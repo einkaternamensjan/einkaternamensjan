@@ -17,7 +17,18 @@ header {
   padding: 2rem;
   position: relative;
   z-index: 1;
-  width: 100%;
+
+  /* keep header content centered and aligned with the blog overview */
+  max-width: 800px;
+  margin: 0 auto;
+
+  /* stack heading and link vertically so the link sits below the H1 */
+  display: flex;
+  flex-direction: column; /* changed: was row */
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
 }
 
 header h1 {
@@ -27,25 +38,42 @@ header h1 {
   text-shadow: 0 2px 4px rgba(0,0,0,0.7);
 }
 
+/* ensure the paragraph/link sits inline and has no extra spacing */
+header p {
+  margin: 0;
+  padding: 0;
+}
+
+header p a {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+}
+
 /* Blog list styles */
 #blog {
   width: 100%;
   max-width: 800px;
   padding: 1.5rem;
+  text-align: center; /* center overview content */
+  margin: 0 auto; /* ensure blog sits centered and aligned with header */
 }
 
 .posts-list {
   display: grid;
   gap: 1rem;
   margin-top: 1rem;
+  justify-items: center; /* center each post card in the grid */
 }
 
 .post {
-  text-align: left;
+  text-align: center; /* center text inside each post */
   background: rgba(255,255,255,0.03);
   padding: 1rem;
   border-radius: 6px;
   color: #fff;
+  width: 100%;
+  max-width: 700px; /* keep posts a readable width while centered */
 }
 
 .post-title {
@@ -53,19 +81,22 @@ header h1 {
   font-weight: bold;
   text-decoration: none;
   font-size: 1.1rem;
-  display: inline-block;
-  margin-bottom: 0.25rem;
+  display: block; /* make it span full width so margin auto centers it */
+  margin: 0.5rem auto 0.25rem;
+  text-align: center;
 }
 
 .post-meta {
   font-size: 0.9rem;
   opacity: 0.8;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .post-excerpt {
   margin: 0;
   opacity: 0.95;
+  text-align: center;
 }
 
 /* make all links red */

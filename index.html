@@ -14,10 +14,7 @@
   </div>
 
   <header>
-    <!-- provide both translations via data attributes -->
     <h1 class="translatable" data-en="Hello World" data-de="Hallo Welt">Hello World</h1>
-
-    <!-- added link to blogs page (translatable) -->
     <p>
       <a class="translatable" data-en="Read all posts" data-de="Alle Beiträge lesen" href="blogs.html">Read all posts</a>
     </p>
@@ -25,72 +22,10 @@
 
   <main>
     <p class="translatable" data-en="Yo, what is up!" data-de="Was geht ab?">Yo, what is up!</p>
-    <p class="translatable" data-en="This site uses Times New Roman." data-de="Diese Seite verwendet Times New Roman.">This site uses Times New Roman.</p>
-
-    <!-- Blog overview -->
-    <section id="blog" aria-labelledby="blog-heading">
-      <h2 id="blog-heading" class="translatable" data-en="Blog" data-de="Blog">Blog</h2>
-      <div id="posts" aria-live="polite">
-        <p class="loading translatable" data-en="Loading posts…" data-de="Beiträge werden geladen…">Loading posts…</p>
-      </div>
-    </section>
   </main>
 
   <script>
-    // language toggle script: switches text for elements that have data-en/data-de
     (function () {
-      let postsData = [];
-
-      const renderPosts = (lang) => {
-        const container = document.getElementById('posts');
-        container.innerHTML = '';
-
-        if (!postsData || postsData.length === 0) {
-          container.innerHTML = '<p class="translatable" data-en="No posts yet." data-de="Noch keine Beiträge.">No posts yet.</p>';
-          // apply translations to any new translatable nodes
-          applyTranslations(lang);
-          return;
-        }
-
-        const list = document.createElement('div');
-        list.className = 'posts-list';
-        postsData.forEach(post => {
-          const item = document.createElement('article');
-          item.className = 'post';
-
-          const title = document.createElement('a');
-          title.className = 'post-title';
-          title.href = post.url || '#';
-          title.textContent = (post.title && post.title[lang]) ? post.title[lang] : (post.title && post.title.en) || 'Untitled';
-
-          const meta = document.createElement('div');
-          meta.className = 'post-meta';
-          meta.textContent = post.date || '';
-
-          const excerpt = document.createElement('p');
-          excerpt.className = 'post-excerpt';
-          excerpt.textContent = (post.excerpt && post.excerpt[lang]) ? post.excerpt[lang] : '';
-
-          item.appendChild(title);
-          if (meta.textContent) item.appendChild(meta);
-          if (excerpt.textContent) item.appendChild(excerpt);
-
-          list.appendChild(item);
-        });
-
-        container.appendChild(list);
-      };
-
-      const fetchPosts = async () => {
-        try {
-          const res = await fetch('posts.json', {cache: "no-store"});
-          if (!res.ok) throw new Error('no posts.json');
-          postsData = await res.json();
-        } catch (e) {
-          postsData = []; // empty -> show fallback
-        }
-      };
-
       const applyTranslations = (lang) => {
         document.querySelectorAll('.translatable').forEach(el => {
           const text = el.getAttribute('data-' + lang);
@@ -98,25 +33,18 @@
         });
       };
 
-      const setLang = async (lang) => {
+      const setLang = (lang) => {
         document.documentElement.lang = (lang === 'de') ? 'de' : 'en';
         applyTranslations(lang);
         document.getElementById('btn-en').setAttribute('aria-pressed', lang === 'en');
         document.getElementById('btn-de').setAttribute('aria-pressed', lang === 'de');
-        await fetchPosts(); // ensure postsData populated (cached on client)
-        renderPosts(lang);
       };
 
-      // attach handlers
       document.getElementById('btn-en').addEventListener('click', () => setLang('en'));
       document.getElementById('btn-de').addEventListener('click', () => setLang('de'));
 
-      // default: try to detect browser language, fall back to English
-      (async function init() {
-        const browserLang = navigator.language && navigator.language.startsWith('de') ? 'de' : 'en';
-        await fetchPosts();
-        setLang(browserLang);
-      })();
+      const browserLang = navigator.language && navigator.language.startsWith('de') ? 'de' : 'en';
+      setLang(browserLang);
     })();
   </script>
 </body>
