@@ -1,18 +1,50 @@
-<!-- ...existing code... -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>einkaternamensjan</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- added header -->
+  <!-- language switcher -->
+  <div class="lang-switch" aria-hidden="false">
+    <button id="btn-en" aria-pressed="true">English</button>
+    <button id="btn-de" aria-pressed="false">Deutsch</button>
+  </div>
+
   <header>
-    <h1>Hello World</h1>
+    <!-- provide both translations via data attributes -->
+    <h1 class="translatable" data-en="Hello World" data-de="Hallo Welt">Hello World</h1>
   </header>
 
-  <!-- ...existing code... -->
+  <main>
+    <p class="translatable" data-en="Yo, what is up!" data-de="Was geht ab?">Yo, what is up!</p>
+    <p class="translatable" data-en="This site uses Times New Roman." data-de="Diese Seite verwendet Times New Roman.">This site uses Times New Roman.</p>
+  </main>
+
+  <script>
+    // language toggle script: switches text for elements that have data-en/data-de
+    (function () {
+      const setLang = (lang) => {
+        document.documentElement.lang = (lang === 'de') ? 'de' : 'en';
+        document.querySelectorAll('.translatable').forEach(el => {
+          const text = el.getAttribute('data-' + lang);
+          if (text !== null) el.textContent = text;
+        });
+        // update buttons' aria state
+        document.getElementById('btn-en').setAttribute('aria-pressed', lang === 'en');
+        document.getElementById('btn-de').setAttribute('aria-pressed', lang === 'de');
+      };
+
+      // attach handlers
+      document.getElementById('btn-en').addEventListener('click', () => setLang('en'));
+      document.getElementById('btn-de').addEventListener('click', () => setLang('de'));
+
+      // default: try to detect browser language, fall back to English
+      const browserLang = navigator.language && navigator.language.startsWith('de') ? 'de' : 'en';
+      setLang(browserLang);
+    })();
+  </script>
 </body>
 </html>
-<!-- ...existing code... -->
