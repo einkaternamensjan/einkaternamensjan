@@ -49,7 +49,7 @@ header h1 {
 }
 
 .post-title {
-  color: #fff;
+  color: red; /* changed from #fff so post links are red like other links */
   font-weight: bold;
   text-decoration: none;
   font-size: 1.1rem;
@@ -66,6 +66,15 @@ header h1 {
 .post-excerpt {
   margin: 0;
   opacity: 0.95;
+}
+
+/* make all links red */
+a, a:visited {
+  color: red;
+}
+a:hover, a:focus {
+  color: #ff6666;
+  text-decoration: underline;
 }
 
 /* language switcher (top-right) */
