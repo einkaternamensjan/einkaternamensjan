@@ -1,0 +1,345 @@
+html, body {
+  margin: 0;
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+  font-family: "Times New Roman", Times, serif;
+
+  /* center content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+header {
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+
+  /* keep header content centered and aligned with the blog overview */
+  max-width: 800px;
+  margin: 0 auto;
+
+  /* stack heading and link vertically so the link sits below the H1 */
+  display: flex;
+  flex-direction: column; /* changed: was row */
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+}
+
+/* ensure the paragraph/link sits inline and has no extra spacing */
+header p {
+  margin: 0;
+  padding: 0;
+}
+
+header p a {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+}
+
+/* Blog list styles */
+#blog {
+  width: 100%;
+  max-width: 800px;
+  padding: 1.5rem;
+  text-align: center; /* center overview content */
+  margin: 0 auto; /* ensure blog sits centered and aligned with header */
+}
+
+.posts-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-items: center; /* center each post card in the grid */
+}
+
+.post {
+  /* center all post content */
+  text-align: center;
+  background: rgba(255,255,255,0.03);
+  padding: 1rem;
+  border-radius: 6px;
+  color: #fff;
+
+  /* limit content width to the central 15cm and keep it centered */
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 15cm;
+  margin: 0 auto;
+}
+
+.post-title {
+  color: red; /* changed from #fff so post links are red like other links */
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 1.1rem;
+  display: block; /* make it span full width so margin auto centers it */
+  margin: 0.5rem auto 0.25rem;
+  text-align: center;
+}
+
+.post-meta {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.post-excerpt {
+  margin: 0;
+  opacity: 0.95;
+  text-align: center;
+}
+
+/* make all links red */
+a, a:visited {
+  color: red;
+}
+a:hover, a:focus {
+  color: #ff6666;
+  text-decoration: underline;
+}
+
+/* language switcher (top-right) */
+.lang-switch {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.06);
+  padding: 0.25rem;
+  border-radius: 6px;
+  z-index: 9999;
+}
+
+.lang-switch button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  padding: 0.35rem 0.6rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.lang-switch button[aria-pressed="true"] {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.22);
+}
+
+/* Comments section styles */
+.comments {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left; /* keep comment bodies left-aligned for readability while page remains centered */
+  color: #fff;
+}
+
+.comments-heading {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  text-align: center; /* heading centered */
+}
+
+.comments-list .no-comments {
+  opacity: 0.9;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.comment {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.03);
+  align-items: flex-start;
+}
+
+.comment-profile {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+}
+
+.comment-profile img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.comment-initials {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.comment-body {
+  flex: 1 1 auto;
+}
+
+.comment-meta {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+}
+
+.comment-text {
+  white-space: pre-wrap;
+  line-height: 1.25;
+}
+
+/* comment form */
+.comment-form {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.comment-form input[type="text"],
+.comment-form input[type="url"],
+.comment-form textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.comment-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.comment-form .btn-post {
+  background: red;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: max-content;
+}
+
+/* Ensure comments area respects the main centering but keeps readable left-aligned content */
+@media (max-width: 560px) {
+  .comment {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+}
+
+/* ensure the blog area and each post are limited to a centred 15cm column */
+main,
+#blog,
+.post {
+  width: 100%;
+  max-width: 15cm;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* prevent wide children (images, code, tables) from overflowing the column */
+.post img,
+.post pre,
+.post code,
+.post table {
+  max-width: 100%;
+  height: auto;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+/* keep comments constrained as well */
+.comments {
+  max-width: 15cm;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.post-content {
+  /* keep post content constrained and readable */
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 15cm;
+  margin: 0 auto 0.75rem;
+  text-align: left; /* readable body text inside centered column */
+  color: #fff;
+}
+
+/* translation controls placed above the post content */
+.translate-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.translate-controls .translate-label {
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.translate-controls button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.translate-controls button:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.translating {
+  opacity: 0.9;
+  font-style: italic;
+}
+
+/* small error text */
+.translate-error {
+  color: #f88;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* ensure comments keep same central width */
+.comments {
+  max-width: 15cm;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* keep comment bodies left-aligned for readability within central column */
+.comments { text-align: left; }
