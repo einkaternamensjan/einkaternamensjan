@@ -3,22 +3,669 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Blog — einkaternamensjan</title>
+  <title>Blog - einkaternamensjan</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Language toggle */
+    .language-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      padding: 0.5rem;
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+    }
+
+    .language-toggle button {
+      padding: 0.5rem 1rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      color: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .language-toggle button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .language-toggle button.active {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.4);
+      font-weight: bold;
+    }
+
+    /* Translation loading state */
+    .translating {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* Comment section styling */
+    .comment-section {
+      max-width: 20cm;
+      margin: 3rem auto 4rem;
+      padding: 1.5rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+    }
+    
+    .comment-section h3 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    /* Comment form */
+    .comment-form {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 4px;
+    }
+
+    .comment-form input,
+    .comment-form textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      color: inherit;
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .comment-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .comment-form button {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+      color: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .comment-form button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .comment-form button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Comments list */
+    .comments-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .comment {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .comment-author {
+      font-weight: bold;
+    }
+
+    .comment-date {
+      font-style: italic;
+    }
+
+    .comment-text {
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .no-comments {
+      text-align: center;
+      padding: 2rem;
+      opacity: 0.6;
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 1rem;
+      opacity: 0.6;
+    }
+
+    /* Article spacing */
+    article {
+      margin-bottom: 4rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    article:last-of-type {
+      border-bottom: none;
+    }
+
+    /* Translation notice */
+    .translation-notice {
+      background: rgba(100, 150, 255, 0.15);
+      border-left: 3px solid rgba(100, 150, 255, 0.5);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
+  <div class="language-toggle">
+    <button class="active" id="lang-en">English</button>
+    <button id="lang-de">Deutsch</button>
+  </div>
+
   <header>
     <h1>Blog</h1>
-    <p><a href="index.html">← Back to Home</a></p>
+    <p><a href="index.html">Back to Home</a></p>
   </header>
-
   <nav aria-label="Contents">
     <h2>Contents</h2>
-    <a href='#2025-10-27-intro-to-blog.md'>- 2025-10-27-intro-to-blog.md</a>
+    <a href='#post-2025-10-27-intro-to-blog'>- 2025-10-27-intro-to-blog.md</a>
   </nav>
-
   <main>
-    <a name='2025-10-27-intro-to-blog.md'></a><h3>Introduction to this Blog</h3><br><br>Hello,<br>If you’re reading this then you’ve either come here deliberately or somehow stumbled upon this page unknowingly. Nonetheless I hope there will be something of interest to be found here. As of writing this introduction to this blog, my aim here is mainly to take my ideas and be able to express them in a clearer but also more meaningful way than I could otherwise. I have no intention of using this purely to strengthen my own views, but rather to expose these thoughts or ideas to the world and see what kind of critiques they may receive. Without this one runs the risk of becoming so entrenched in one’s own views that it leads to nothing but dogmatism and furthermore blind ignorance. I can’t promise a consistent schedule for my posts, unfortunately some things take considerably longer to write than others, but I do plan to try and keep this semi-regular. As of yet I have no comment function to receive feedback, but I will try and add one. Some posts may vary between German and English, I find some things easier to formulate in German and some things in English, it is usually dependant upon my source material. Unfortunately I am yet to find a reliable translate function for this page so for the time being a plug-in will have to be used. Thank you. <br><br>Posted 27.10.2025<br><br>
+    <article id="post-2025-10-27-intro-to-blog">
+<h3>Introduction to this Blog</h3><br><br>Hello,<br>If you’re reading this then you’ve either come here deliberately or somehow stumbled upon this page unknowingly. Nonetheless I hope there will be something of interest to be found here. As of writing this introduction to this blog, my aim here is mainly to take my ideas and be able to express them in a clearer but also more meaningful way than I could otherwise. I have no intention of using this purely to strengthen my own views, but rather to expose these thoughts or ideas to the world and see what kind of critiques they may receive. Without this one runs the risk of becoming so entrenched in one’s own views that it leads to nothing but dogmatism and furthermore blind ignorance. I can’t promise a consistent schedule for my posts, unfortunately some things take considerably longer to write than others, but I do plan to try and keep this semi-regular. As of yet I have no comment function to receive feedback, but I will try and add one. Some posts may vary between German and English, I find some things easier to formulate in German and some things in English, it is usually dependant upon my source material. Unfortunately I am yet to find a reliable translate function for this page so for the time being a plug-in will have to be used. Thank you. <br><br>Posted 27.10.2025<br><br>
+</article>
   </main>
+
+  <script>
+    var COMMENTS_KEY = 'blog_comments';
+    var TRANSLATIONS_KEY = 'blog_translations';
+    var CURRENT_LANG_KEY = 'blog_current_lang';
+
+    var commentsStore = loadCommentsFromStorage();
+    var translationsCache = loadTranslationsFromStorage();
+    var currentLang = localStorage.getItem(CURRENT_LANG_KEY) || 'en';
+    var originalContent = new Map();
+
+    function loadCommentsFromStorage() {
+      try {
+        var stored = localStorage.getItem(COMMENTS_KEY);
+        return stored ? JSON.parse(stored) : {};
+      } catch (e) {
+        console.error('Error loading comments:', e);
+        return {};
+      }
+    }
+
+    function saveCommentsToStorage(comments) {
+      try {
+        localStorage.setItem(COMMENTS_KEY, JSON.stringify(comments));
+      } catch (e) {
+        console.error('Error saving comments:', e);
+      }
+    }
+
+    function loadTranslationsFromStorage() {
+      try {
+        var stored = localStorage.getItem(TRANSLATIONS_KEY);
+        return stored ? JSON.parse(stored) : {};
+      } catch (e) {
+        console.error('Error loading translations:', e);
+        return {};
+      }
+    }
+
+    function saveTranslationsToStorage(translations) {
+      try {
+        localStorage.setItem(TRANSLATIONS_KEY, JSON.stringify(translations));
+      } catch (e) {
+        console.error('Error saving translations:', e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var articles = document.querySelectorAll('main article');
+      
+      articles.forEach(function(article, index) {
+        if (!article.id) {
+          var heading = article.querySelector('h2, h3');
+          var slug = heading ? heading.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'post-' + index;
+          article.id = slug;
+        }
+        
+        originalContent.set(article.id, article.innerHTML);
+        
+        if (!commentsStore[article.id]) {
+          commentsStore[article.id] = [];
+        }
+        
+        var commentSection = createCommentSection(article.id);
+        article.appendChild(commentSection);
+        renderComments(article.id);
+      });
+
+      document.getElementById('lang-en').addEventListener('click', function() {
+        switchLanguage('en');
+      });
+      document.getElementById('lang-de').addEventListener('click', function() {
+        switchLanguage('de');
+      });
+
+      updateLanguageButtons();
+      if (currentLang === 'de') {
+        translateAllArticles('de');
+      }
+    });
+
+    function updateLanguageButtons() {
+      document.getElementById('lang-en').classList.toggle('active', currentLang === 'en');
+      document.getElementById('lang-de').classList.toggle('active', currentLang === 'de');
+    }
+
+    function switchLanguage(lang) {
+      if (lang === currentLang) return;
+      
+      console.log('Switching language to:', lang);
+      
+      currentLang = lang;
+      localStorage.setItem(CURRENT_LANG_KEY, lang);
+      updateLanguageButtons();
+
+      if (lang === 'en') {
+        restoreOriginalContent();
+      } else {
+        console.log('Starting translation...');
+        translateAllArticles('de');
+      }
+    }
+
+    function restoreOriginalContent() {
+      var articles = document.querySelectorAll('main article');
+      articles.forEach(function(article) {
+        var original = originalContent.get(article.id);
+        if (original) {
+          var commentSection = article.querySelector('.comment-section');
+          article.innerHTML = original;
+          if (commentSection) {
+            article.appendChild(commentSection);
+          }
+        }
+      });
+    }
+
+    function translateAllArticles(targetLang) {
+      var articles = document.querySelectorAll('main article');
+      console.log('Found articles to translate:', articles.length);
+      
+      var index = 0;
+      function translateNext() {
+        if (index >= articles.length) return;
+        
+        var article = articles[index];
+        var commentSection = article.querySelector('.comment-section');
+        
+        translateArticle(article, targetLang).then(function() {
+          if (commentSection) {
+            article.appendChild(commentSection);
+          }
+          index++;
+          translateNext();
+        });
+      }
+      
+      translateNext();
+    }
+
+    function translateArticle(article, targetLang) {
+      return new Promise(function(resolve) {
+        var articleId = article.id;
+        var cacheKey = articleId + '_' + targetLang;
+        
+        console.log('Translating article:', articleId);
+        
+        if (translationsCache[cacheKey]) {
+          console.log('Using cached translation');
+          var commentSection = article.querySelector('.comment-section');
+          article.innerHTML = translationsCache[cacheKey];
+          if (commentSection) {
+            article.appendChild(commentSection);
+          }
+          resolve();
+          return;
+        }
+
+        var commentSection = article.querySelector('.comment-section');
+        if (commentSection) {
+          commentSection.remove();
+        }
+
+        var notice = document.createElement('div');
+        notice.className = 'translation-notice';
+        notice.textContent = 'Translating...';
+        article.insertBefore(notice, article.firstChild);
+
+        var articleHTML = article.innerHTML;
+        console.log('Article HTML length:', articleHTML.length);
+        
+        var lines = articleHTML.split(/<br\s*\/?>/i);
+        console.log('Split into lines:', lines.length);
+        
+        var translatedLines = [];
+        var lineIndex = 0;
+
+        function translateNextLine() {
+          if (lineIndex >= lines.length) {
+            console.log('Translation complete, reconstructing article');
+            article.innerHTML = translatedLines.join('<br>');
+            
+            var finalNotice = document.createElement('div');
+            finalNotice.className = 'translation-notice';
+            finalNotice.textContent = 'Translated from English to German';
+            article.insertBefore(finalNotice, article.firstChild);
+            
+            translationsCache[cacheKey] = article.innerHTML;
+            saveTranslationsToStorage(translationsCache);
+            if (commentSection) {
+              article.appendChild(commentSection);
+            }
+            resolve();
+            return;
+          }
+
+          var line = lines[lineIndex];
+          var tempDiv = document.createElement('div');
+          tempDiv.innerHTML = line;
+          var textContent = tempDiv.textContent.trim();
+          
+          console.log('Line ' + lineIndex + ':', textContent.substring(0, 50));
+          
+          if (textContent && !tempDiv.querySelector('.translation-notice')) {
+            if (/<h[1-6]>/.test(line) || /<pre>/.test(line) || /<code>/.test(line) || /<a/.test(line)) {
+              console.log('Line contains HTML tags, parsing...');
+              var parser = new DOMParser();
+              var doc = parser.parseFromString(line, 'text/html');
+              var textNodes = [];
+              var walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+              var node;
+              while (node = walker.nextNode()) {
+                var text = node.textContent.trim();
+                if (text && node.parentElement.tagName !== 'CODE' && node.parentElement.tagName !== 'A') {
+                  textNodes.push({node: node, text: text});
+                }
+              }
+              
+              if (textNodes.length > 0) {
+                var nodeIndex = 0;
+                function translateNextNode() {
+                  if (nodeIndex >= textNodes.length) {
+                    translatedLines.push(doc.body.innerHTML);
+                    lineIndex++;
+                    translateNextLine();
+                    return;
+                  }
+                  
+                  var nodeData = textNodes[nodeIndex];
+                  console.log('Translating node text:', nodeData.text.substring(0, 30));
+                  translateText(nodeData.text, targetLang).then(function(translated) {
+                    if (translated) {
+                      console.log('Translated to:', translated.substring(0, 30));
+                      nodeData.node.textContent = translated;
+                    }
+                    nodeIndex++;
+                    translateNextNode();
+                  });
+                }
+                translateNextNode();
+              } else {
+                translatedLines.push(line);
+                lineIndex++;
+                translateNextLine();
+              }
+            } else {
+              console.log('Plain text line, translating:', textContent.substring(0, 30));
+              translateText(textContent, targetLang).then(function(translated) {
+                console.log('Translated result:', translated ? translated.substring(0, 30) : 'null');
+                translatedLines.push(translated || line);
+                lineIndex++;
+                translateNextLine();
+              });
+            }
+          } else {
+            console.log('Skipping empty line');
+            translatedLines.push(line);
+            lineIndex++;
+            translateNextLine();
+          }
+        }
+
+        translateNextLine();
+      });
+    }
+
+    function translateText(text, targetLang) {
+      return new Promise(function(resolve) {
+        // MyMemory API has 500 char limit, so split long text into sentences
+        if (text.length > 450) {
+          // Split by sentences
+          var sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+          var translatedSentences = [];
+          var sentenceIndex = 0;
+          
+          function translateNextSentence() {
+            if (sentenceIndex >= sentences.length) {
+              resolve(translatedSentences.join(' '));
+              return;
+            }
+            
+            var sentence = sentences[sentenceIndex].trim();
+            if (sentence.length > 450) {
+              // If single sentence is too long, split by commas
+              var parts = sentence.split(',');
+              var partTranslations = [];
+              var partIndex = 0;
+              
+              function translateNextPart() {
+                if (partIndex >= parts.length) {
+                  translatedSentences.push(partTranslations.join(','));
+                  sentenceIndex++;
+                  translateNextSentence();
+                  return;
+                }
+                
+                translateSingleText(parts[partIndex].trim(), targetLang).then(function(translated) {
+                  partTranslations.push(translated || parts[partIndex]);
+                  partIndex++;
+                  translateNextPart();
+                });
+              }
+              translateNextPart();
+            } else {
+              translateSingleText(sentence, targetLang).then(function(translated) {
+                translatedSentences.push(translated || sentence);
+                sentenceIndex++;
+                translateNextSentence();
+              });
+            }
+          }
+          
+          translateNextSentence();
+        } else {
+          translateSingleText(text, targetLang).then(resolve);
+        }
+      });
+    }
+    
+    function translateSingleText(text, targetLang) {
+      return new Promise(function(resolve) {
+        var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=en|' + targetLang;
+        
+        fetch(url)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data) {
+          console.log('Translation response:', data);
+          if (data.responseData && data.responseData.translatedText) {
+            resolve(data.responseData.translatedText);
+          } else if (data.responseStatus === 403) {
+            console.error('Translation limit exceeded');
+            resolve(null);
+          } else {
+            resolve(null);
+          }
+        })
+        .catch(function(error) {
+          console.error('Translation API error:', error);
+          resolve(null);
+        });
+      });
+    }
+
+    function createCommentSection(postId) {
+      var section = document.createElement('div');
+      section.className = 'comment-section';
+      
+      var heading = document.createElement('h3');
+      heading.textContent = 'Comments';
+      section.appendChild(heading);
+      
+      var form = document.createElement('div');
+      form.className = 'comment-form';
+      
+      var nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.id = 'name-' + postId;
+      nameInput.placeholder = 'Your name';
+      nameInput.required = true;
+      nameInput.maxLength = 50;
+      
+      var commentInput = document.createElement('textarea');
+      commentInput.id = 'comment-' + postId;
+      commentInput.placeholder = 'Write your comment...';
+      commentInput.required = true;
+      commentInput.maxLength = 1000;
+      
+      var button = document.createElement('button');
+      button.textContent = 'Post Comment';
+      button.setAttribute('data-post-id', postId);
+      button.addEventListener('click', function() {
+        submitComment(this.getAttribute('data-post-id'));
+      });
+      
+      form.appendChild(nameInput);
+      form.appendChild(commentInput);
+      form.appendChild(button);
+      section.appendChild(form);
+      
+      var commentsContainer = document.createElement('div');
+      commentsContainer.id = 'comments-' + postId;
+      commentsContainer.className = 'comments-container';
+      commentsContainer.innerHTML = '<p class="loading">Loading comments...</p>';
+      section.appendChild(commentsContainer);
+      
+      return section;
+    }
+
+    function submitComment(postId) {
+      var nameInput = document.getElementById('name-' + postId);
+      var commentInput = document.getElementById('comment-' + postId);
+      var button = event.target;
+      
+      var name = nameInput.value.trim();
+      var text = commentInput.value.trim();
+      
+      if (!name || !text) {
+        alert('Please fill in both your name and comment');
+        return;
+      }
+      
+      button.disabled = true;
+      
+      var comment = {
+        id: Date.now().toString(),
+        author: name,
+        text: text,
+        date: new Date().toISOString(),
+        timestamp: Date.now()
+      };
+      
+      commentsStore[postId].push(comment);
+      saveCommentsToStorage(commentsStore);
+      
+      nameInput.value = '';
+      commentInput.value = '';
+      
+      renderComments(postId);
+      
+      button.disabled = false;
+      
+      var originalText = button.textContent;
+      button.textContent = 'Posted!';
+      setTimeout(function() {
+        button.textContent = originalText;
+      }, 2000);
+    }
+
+    function renderComments(postId) {
+      var container = document.getElementById('comments-' + postId);
+      var comments = commentsStore[postId] || [];
+      
+      if (comments.length === 0) {
+        container.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+        return;
+      }
+      
+      var sortedComments = comments.slice().sort(function(a, b) {
+        return b.timestamp - a.timestamp;
+      });
+      
+      var commentsList = document.createElement('ul');
+      commentsList.className = 'comments-list';
+      
+      sortedComments.forEach(function(comment) {
+        var li = document.createElement('li');
+        li.className = 'comment';
+        
+        var date = new Date(comment.date);
+        var dateStr = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        li.innerHTML = '<div class="comment-header"><span class="comment-author">' + escapeHtml(comment.author) + '</span><span class="comment-date">' + dateStr + '</span></div><div class="comment-text">' + escapeHtml(comment.text) + '</div>';
+        commentsList.appendChild(li);
+      });
+      
+      container.innerHTML = '';
+      container.appendChild(commentsList);
+    }
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
 </body>
 </html>

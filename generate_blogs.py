@@ -55,13 +55,29 @@ assert compile_markdown("### Subtitle\n") == "<h4>Subtitle</h4><br>"
 
 blogs_compiled = list(map(compile_markdown, blogs))
 
+# Create slug from filename for use as article ID
+def create_slug(filename):
+    # Remove .md extension and convert to URL-friendly slug
+    slug = filename.replace('.md', '')
+    slug = re.sub(r'[^a-z0-9]+', '-', slug.lower())
+    slug = slug.strip('-')
+    # Ensure slug doesn't start with a number
+    if slug and slug[0].isdigit():
+        slug = 'post-' + slug
+    return slug
+
 # Create the contents page at the top of the
 # blog which links to each blog on the page
-blog_contents = [f"<a href='#{name}'>- {name}</a>" for name in blog_paths]
-blogs_with_anchors = [f"<a name='{name}'></a>{blog}"
-                       for (name, blog) in zip(blog_paths, blogs_compiled)]
+blog_contents = [f"<a href='#{create_slug(name)}'>- {name}</a>" for name in blog_paths]
 
-blog_html = template.replace("###BLOGS###", "\n<hr>\n".join(blogs_with_anchors))
+# Wrap each blog in <article> tags with proper ID
+blogs_with_articles = []
+for name, blog in zip(blog_paths, blogs_compiled):
+    slug = create_slug(name)
+    article_html = f'<article id="{slug}">\n{blog}\n</article>'
+    blogs_with_articles.append(article_html)
+
+blog_html = template.replace("###BLOGS###", "\n<hr>\n".join(blogs_with_articles))
 blog_html = blog_html.replace("###BLOG-CONTENTS###", "<br>".join(blog_contents))
 
 with OUT_FILE.open("w", encoding="utf-8", errors="replace") as fh:
