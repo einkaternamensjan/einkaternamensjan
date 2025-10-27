@@ -1,3 +1,0 @@
-## myblogtitle
-
-Hello everyone

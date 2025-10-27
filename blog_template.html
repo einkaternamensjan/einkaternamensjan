@@ -7,18 +7,270 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="lang-switch" aria-hidden="false">
+    <button id="btn-en" aria-pressed="true">English</button>
+    <button id="btn-de" aria-pressed="false">Deutsch</button>
+  </div>
+
   <header>
-    <h1>Blog</h1>
-    <p><a href="index.html">← Back to Home</a></p>
+    <h1 class="translatable" data-en="All Posts" data-de="Alle Beiträge">All Posts</h1>
+    <p><a href="index.html" class="translatable" data-en="← Back to Home" data-de="← Zurück zur Startseite">← Back to Home</a></p>
   </header>
 
   <nav aria-label="Contents">
-    <h2>Contents</h2>
+    <h2 class="translatable" data-en="Contents" data-de="Inhalt">Contents</h2>
+    <!-- generator output goes here -->
     ###BLOG-CONTENTS###
   </nav>
 
   <main>
+    <!-- generator inserts posts here -->
     ###BLOGS###
   </main>
+
+  <script>
+    (function () {
+      // --- helpers ---
+      const escapeHtml = s => String(s || '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+      const UI = {
+        en: {
+          commentsHeading: "Comments",
+          noComments: "No comments yet.",
+          nameLabel: "Name",
+          profileLabel: "Profile URL (optional)",
+          commentLabel: "Comment",
+          postButton: "Post Comment",
+          placeholderComment: "Write your comment here…",
+          translateLabel: "Translate post",
+          translateToEn: "To English",
+          translateToDe: "To Deutsch"
+        },
+        de: {
+          commentsHeading: "Kommentare",
+          noComments: "Noch keine Kommentare.",
+          nameLabel: "Name",
+          profileLabel: "Profil-URL (optional)",
+          commentLabel: "Kommentar",
+          postButton: "Kommentar posten",
+          placeholderComment: "Schreibe deinen Kommentar…",
+          translateLabel: "Beitrag übersetzen",
+          translateToEn: "Nach Englisch",
+          translateToDe: "Nach Deutsch"
+        }
+      };
+
+      // keep siteLang declared early to avoid TDZ/ReferenceError
+      let siteLang = localStorage.getItem('site-lang') || (navigator.language && navigator.language.startsWith('de') ? 'de' : 'en');
+
+      function applyTranslations(lang) {
+        document.querySelectorAll('.translatable').forEach(el => {
+          const t = el.getAttribute('data-' + lang);
+          if (t !== null) el.textContent = t;
+        });
+      }
+
+      // --- comments (localStorage) ---
+      function getPostKey(postEl) {
+        if (postEl.id) return 'comments::' + postEl.id;
+        const prev = postEl.previousElementSibling;
+        if (prev && prev.id) return 'comments::' + prev.id;
+        const heading = postEl.querySelector('h1,h2,h3,h4,h5');
+        if (heading && heading.textContent) {
+          const slug = heading.textContent.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^\w\-]/g,'');
+          return 'comments::' + (slug || 'post');
+        }
+        return 'comments::post';
+      }
+      function loadComments(key) {
+        try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
+      }
+      function saveComments(key, comments) { localStorage.setItem(key, JSON.stringify(comments)); }
+      function formatDate(iso, lang) {
+        const d = new Date(iso);
+        const locale = (lang === 'de') ? 'de-DE' : 'en-GB';
+        return d.toLocaleString(locale);
+      }
+
+      function renderCommentsForPost(postEl, key, lang) {
+        const container = postEl.querySelector('.comments');
+        if (!container) return;
+        const listEl = container.querySelector('.comments-list');
+        listEl.innerHTML = '';
+        const comments = loadComments(key);
+        if (!comments.length) {
+          const p = document.createElement('p');
+          p.className = 'no-comments';
+          p.textContent = UI[lang].noComments;
+          listEl.appendChild(p);
+          return;
+        }
+        comments.forEach(c => {
+          const item = document.createElement('div');
+          item.className = 'comment';
+          const profileWrap = document.createElement('div'); profileWrap.className = 'comment-profile';
+          if (c.profile) {
+            const img = document.createElement('img'); img.src = c.profile; img.alt = c.name || 'profile'; profileWrap.appendChild(img);
+          } else {
+            const initials = document.createElement('div'); initials.className = 'comment-initials';
+            const name = (c.name || '').trim(); initials.textContent = name ? name.split(/\s+/).map(s=>s[0]).slice(0,2).join('').toUpperCase() : '?';
+            profileWrap.appendChild(initials);
+          }
+          const body = document.createElement('div'); body.className = 'comment-body';
+          const meta = document.createElement('div'); meta.className = 'comment-meta';
+          meta.textContent = (c.name || 'Anonymous') + ' • ' + formatDate(c.ts, lang);
+          const text = document.createElement('div'); text.className = 'comment-text';
+          text.innerHTML = escapeHtml(c.text).replace(/\n/g,'<br>');
+          body.appendChild(meta); body.appendChild(text);
+          item.appendChild(profileWrap); item.appendChild(body);
+          listEl.appendChild(item);
+        });
+      }
+
+      function updateCommentFormText(postEl, lang) {
+        const form = postEl.querySelector('.comment-form');
+        if (!form) return;
+        // update labels/placeholders/buttons
+        const nameLabel = form.querySelector('.label-name');
+        const profileLabel = form.querySelector('.label-profile');
+        const commentLabel = form.querySelector('.label-comment');
+        if (nameLabel) nameLabel.firstChild.nodeValue = UI[lang].nameLabel + '\n';
+        if (profileLabel) profileLabel.firstChild.nodeValue = UI[lang].profileLabel + '\n';
+        if (commentLabel) commentLabel.firstChild.nodeValue = UI[lang].commentLabel + '\n';
+        const ta = form.querySelector('.input-text'); if (ta) ta.placeholder = UI[lang].placeholderComment;
+        const btn = form.querySelector('.btn-post'); if (btn) btn.textContent = UI[lang].postButton;
+        const heading = postEl.querySelector('.comments-heading'); if (heading) heading.textContent = UI[lang].commentsHeading;
+      }
+
+      function attachCommentUI(postEl, lang) {
+        const key = getPostKey(postEl);
+        if (postEl.querySelector('.comments')) return; // already attached
+
+        const commentsWrap = document.createElement('div'); commentsWrap.className = 'comments';
+        const heading = document.createElement('h3'); heading.className = 'comments-heading'; heading.textContent = UI[lang].commentsHeading; commentsWrap.appendChild(heading);
+        const list = document.createElement('div'); list.className = 'comments-list'; commentsWrap.appendChild(list);
+
+        const form = document.createElement('form'); form.className = 'comment-form';
+        form.innerHTML = `
+          <label class="label-name">${escapeHtml(UI[lang].nameLabel)}<br><input name="name" type="text" class="input-name" /></label>
+          <label class="label-profile">${escapeHtml(UI[lang].profileLabel)}<br><input name="profile" type="url" class="input-profile" /></label>
+          <label class="label-comment">${escapeHtml(UI[lang].commentLabel)}<br><textarea name="text" class="input-text" placeholder="${escapeHtml(UI[lang].placeholderComment)}"></textarea></label>
+          <div><button type="submit" class="btn-post">${escapeHtml(UI[lang].postButton)}</button></div>
+        `;
+        commentsWrap.appendChild(form);
+        postEl.appendChild(commentsWrap);
+        renderCommentsForPost(postEl, key, lang);
+
+        form.addEventListener('submit', function (ev) {
+          ev.preventDefault();
+          const fd = new FormData(form);
+          const name = (fd.get('name')||'').toString().trim();
+          const profile = (fd.get('profile')||'').toString().trim();
+          const text = (fd.get('text')||'').toString().trim();
+          if (!text) return;
+          const comments = loadComments(key);
+          comments.push({ name, profile, text, ts: new Date().toISOString() });
+          saveComments(key, comments);
+          form.reset();
+          renderCommentsForPost(postEl, key, siteLang);
+        }, {passive:false});
+      }
+
+      // --- translation helpers for post content ---
+      function ensurePostContent(postEl) {
+        let content = postEl.querySelector('.post-content');
+        if (content) return content;
+        content = document.createElement('div'); content.className = 'post-content';
+        // move children that are not the comments container into content
+        const children = Array.from(postEl.childNodes).filter(n => !(n.nodeType === 1 && n.classList && n.classList.contains('comments')));
+        children.forEach(n => content.appendChild(n));
+        postEl.insertBefore(content, postEl.firstChild);
+        return content;
+      }
+
+      function hasInlineTranslations(contentEl) {
+        return !!contentEl.querySelector('[data-en],[data-de]');
+      }
+
+      async function translateWithAPI(text, target) {
+        try {
+          const res = await fetch('https://libretranslate.de/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ q: text, source: 'auto', target: target, format: 'text' })
+          });
+          if (!res.ok) throw new Error('translate failed');
+          const j = await res.json();
+          return j.translatedText;
+        } catch (e) {
+          console.error('translate error', e);
+          return null;
+        }
+      }
+
+      async function setPostLanguage(postEl, lang) {
+        const content = ensurePostContent(postEl);
+        if (hasInlineTranslations(content)) {
+          content.querySelectorAll('[data-en],[data-de]').forEach(el => {
+            const t = el.getAttribute('data-' + lang);
+            if (t !== null) el.textContent = t;
+          });
+          return;
+        }
+        const currentPlain = content.innerText;
+        const target = (lang === 'de') ? 'de' : 'en';
+        const originalHTML = content.innerHTML;
+        content.innerHTML = '<p class="translating">Translating…</p>';
+        const translated = await translateWithAPI(currentPlain, target);
+        if (translated !== null) {
+          content.innerHTML = '<div class="translated-content">' + escapeHtml(translated).replace(/\n/g,'<br>') + '</div>';
+        } else {
+          content.innerHTML = originalHTML + '<p class="translate-error">Translation failed.</p>';
+        }
+      }
+
+      function attachTranslateControls(postEl, lang) {
+        if (postEl.querySelector('.translate-controls')) return;
+        const wrap = document.createElement('div'); wrap.className = 'translate-controls';
+        const label = document.createElement('span'); label.className = 'translate-label'; label.textContent = UI[lang].translateLabel + ': ';
+        const btnEn = document.createElement('button'); btnEn.type = 'button'; btnEn.className = 'btn-translate-en'; btnEn.textContent = UI[lang].translateToEn;
+        const btnDe = document.createElement('button'); btnDe.type = 'button'; btnDe.className = 'btn-translate-de'; btnDe.textContent = UI[lang].translateToDe;
+        wrap.appendChild(label); wrap.appendChild(btnEn); wrap.appendChild(btnDe);
+        const content = ensurePostContent(postEl);
+        postEl.insertBefore(wrap, content);
+
+        btnEn.addEventListener('click', () => setPostLanguage(postEl, 'en'));
+        btnDe.addEventListener('click', () => setPostLanguage(postEl, 'de'));
+      }
+
+      // init after DOM ready
+      document.addEventListener('DOMContentLoaded', function () {
+        // apply UI translations immediately
+        applyTranslations(siteLang);
+        const btnEn = document.getElementById('btn-en');
+        const btnDe = document.getElementById('btn-de');
+        if (btnEn && btnDe) {
+          btnEn.setAttribute('aria-pressed', siteLang === 'en');
+          btnDe.setAttribute('aria-pressed', siteLang === 'de');
+          btnEn.addEventListener('click', () => {
+            siteLang = 'en'; localStorage.setItem('site-lang', 'en'); applyTranslations('en');
+            document.querySelectorAll('article.post, .post').forEach(p => { renderCommentsForPost(p, getPostKey(p), siteLang); updateCommentFormText(p, siteLang); });
+          });
+          btnDe.addEventListener('click', () => {
+            siteLang = 'de'; localStorage.setItem('site-lang', 'de'); applyTranslations('de');
+            document.querySelectorAll('article.post, .post').forEach(p => { renderCommentsForPost(p, getPostKey(p), siteLang); updateCommentFormText(p, siteLang); });
+          });
+        }
+
+        // attach translate controls and comments to each post
+        document.querySelectorAll('article.post, .post').forEach(p => {
+          attachTranslateControls(p, siteLang);
+          attachCommentUI(p, siteLang);
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
